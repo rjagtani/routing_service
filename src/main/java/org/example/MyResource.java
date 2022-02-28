@@ -40,8 +40,6 @@ public class MyResource {
         double start_lon = start_lonJson.doubleValue();
         double end_lat = end_latJson.doubleValue();
         double end_lon = end_lonJson.doubleValue();
-        //String route = RequestDirection.getRoute(originLat, originLong, destinationLat, destinationLong);
-
         return ShortestPath.RouteFinder(start_lat, start_lon, end_lat, end_lon);
     }
 }

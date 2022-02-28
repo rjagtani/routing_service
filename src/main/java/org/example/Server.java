@@ -13,7 +13,7 @@ public class Server {
     private Graph graph;
 
     public void load() throws IOException {
-        try (ServerSocket serverSocket = new ServerSocket(1234)) {
+        try (ServerSocket serverSocket = new ServerSocket(1111)) {
             String file = "src/main/java/org/example/schleswig-holstein.json";
 
             //ObjectMapper maps a json to a pojo. For our purposes the pojo is an instance of our Geojson class

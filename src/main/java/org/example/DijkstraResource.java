@@ -10,9 +10,8 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 
 
-
-@Path("/astar")
-public class AStarRessource {
+@Path("/dijkstra")
+public class DijkstraResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public String get(@QueryParam("originLat") double originLat, @QueryParam("originLon") double originLon,
@@ -29,7 +28,7 @@ public class AStarRessource {
             ObjectOutputStream obj_output_stream = new ObjectOutputStream(output_stream);
             ObjectInputStream obj_input_stream = new ObjectInputStream(input_stream);
 
-            double[] requestArray = {originLat, originLon, destinationLat, destinationLon, 1};
+            double[] requestArray = {originLat, originLon, destinationLat, destinationLon, 0};
 
             obj_output_stream.writeObject(requestArray);
             route = (String) obj_input_stream.readObject();
@@ -44,4 +43,3 @@ public class AStarRessource {
         return route;
     }
 }
-
