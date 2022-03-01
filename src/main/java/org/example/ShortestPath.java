@@ -1,17 +1,12 @@
 package org.example;
 
-//package de.lmu.ifi.dbs.sysdev.openrouteservice;
-
 
 import jakarta.json.Json;
-import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.glassfish.jersey.client.JerseyClient;
 import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.glassfish.jersey.client.JerseyWebTarget;
 
 import java.io.StringReader;
 
@@ -32,24 +27,20 @@ public class ShortestPath {
                 ).build();
         // use the jersey client api to make HTTP requests
         final JerseyClient client = new JerseyClientBuilder().build();
-        //System.out.println("Hellooo0");
+
         Response response = client.target(OPENROUTESERVICE_URL)
                 .request()
                 .header("Authorization", OPENROUTESERVICE_KEY)
                 .header("Accept", "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8")
                 .header("Content-Type", "application/json; charset=utf-8")
                 .post(Entity.json(request_api));
-        //System.out.println("Hellooo1");
         // check the result
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            //System.out.println("Helloo :( ");
             throw new RuntimeException("Failed: HTTP error code: " + response.getStatus());
         }
-        //System.out.println("Hellooo1.5");
         // get the JSON response
         final String responseString = response.readEntity(String.class);
         final JsonObject jsonObject = Json.createReader(new StringReader(responseString)).readObject();
-        //System.out.println("Hellooo2");
         System.out.println(responseString);
         return responseString;
     }

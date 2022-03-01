@@ -1,11 +1,14 @@
 package org.example;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 public class Server {
@@ -16,26 +19,24 @@ public class Server {
         try (ServerSocket serverSocket = new ServerSocket(1111)) {
             String file = "src/main/java/org/example/schleswig-holstein.json";
 
-            //ObjectMapper maps a json to a pojo. For our purposes the pojo is an instance of our Geojson class
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            Geojson mapJson = mapper.readValue(new FileInputStream(file), Geojson.class);
-            //Create Graph object from the Map-json, to do path-searches on.
-            graph = new Graph(mapJson);
+            MapJson jsonMap = mapper.readValue(new FileInputStream(file), MapJson.class);
+
+            graph = new Graph(jsonMap);
 
 
             while (true) {
 
                 Socket clientSocket = serverSocket.accept();
-                Thread thRoute = startRoute(clientSocket);
+                Thread thRoute = findRoute(clientSocket);
                 thRoute.start();
 
             }
         }
     }
 
-    public Thread startRoute(Socket socket){
-        System.out.println("Received new routing request");
+    public Thread findRoute(Socket socket){
         Thread t = new Thread() {
             public void run() {
                 InputStream is = null;
@@ -51,7 +52,6 @@ public class Server {
                     e.printStackTrace();
                 }
 
-                //Receive double array of coordinates for the path-search
                 ObjectInputStream ois = null;
                 try {
                     ois = new ObjectInputStream(is);
@@ -59,7 +59,6 @@ public class Server {
                     e.printStackTrace();
                 }
 
-                //Send Object Outputstream to send Geojson path through.
                 ObjectOutputStream oos = null;
                 try {
                     oos = new ObjectOutputStream(os);
@@ -67,31 +66,31 @@ public class Server {
                     e.printStackTrace();
                 }
 
-                double[] coords = new double[0];
+                double[] coordinates = new double[0];
                 try {
-                    coords = (double[])ois.readObject();
+                    coordinates = (double[])ois.readObject();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-                double originLat = coords[0];
-                double originLong = coords[1];
-                double destinationLat = coords[2];
-                double destinationLong = coords[3];
-                double algorithm = coords[4];
+                double originLat = coordinates[0];
+                double originLon = coordinates[1];
+                double destinationLat = coordinates[2];
+                double destinationLon = coordinates[3];
+                double algorithm = coordinates[4];
 
                 ArrayList<Node> route;
 
                 if (algorithm == 0) {
-                    route = graph.anyLocationDijkstra(originLat, originLong, destinationLat, destinationLong);
+                    route = graph.anyLocationDijkstra(originLat, originLon, destinationLat, destinationLon);
 
                 } else {
-                    route = graph.anyLocationAStar(originLat, originLong, destinationLat, destinationLong);
+                    route = graph.anyLocationAStar(originLat, originLon, destinationLat, destinationLon);
                 }
                 String routeGeoJson = null;
                 try {
-                    routeGeoJson = Geojson.transformToString(route);
+                    routeGeoJson = MapJson.routeToJson(route);
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
